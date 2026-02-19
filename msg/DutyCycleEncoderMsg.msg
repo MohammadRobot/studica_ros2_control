@@ -1,0 +1,3 @@
+float64 absolute_angle
+int32 rollover_count
+float64 total_rotation

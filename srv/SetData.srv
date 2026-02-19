@@ -1,0 +1,8 @@
+string command
+string name
+string component
+string params
+InitializeParams initparams
+---
+bool success
+string message
