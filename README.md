@@ -7,8 +7,10 @@ This package wraps the Studica VMXPi driver library and publishes ROS topics/ser
 
 - VMXPi library installed on the target machine.
 - `studica_drivers` built in the same workspace.
+- `joy` package for joystick input (`sudo apt install ros-humble-joy`).
 
-If VMXPi is not available, `studica_drivers` builds as a stub and this package will be skipped during build.
+If VMXPi is not available, `studica_drivers` builds as a stub.
+In that case, `studica_control` still builds joystick teleop nodes, but hardware components are skipped.
 
 ## Build
 
@@ -38,6 +40,12 @@ Sensor-only launch (recommended when using ros2_control for drive):
 
 ```bash
 ros2 launch studica_control sensors_only.launch.py
+```
+
+Gamepad launch (works in simulation and hardware):
+
+```bash
+ros2 launch studica_control gamepad_launch.py cmd_vel_topic:=/diffbot_base_controller/cmd_vel publish_stamped:=true
 ```
 
 ## Using With vmxpi_ros2

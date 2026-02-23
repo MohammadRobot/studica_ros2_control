@@ -1,5 +1,7 @@
 #include "studica_control/gamepad_component.h"
 
+#include <cmath>
+
 namespace studica_control {
 
 std::shared_ptr<rclcpp::Node> GamepadController::initialize(rclcpp::Node * /*control*/) {
@@ -13,16 +15,20 @@ GamepadController::GamepadController(const rclcpp::NodeOptions &options)
     
     // Declare parameters with default values
     this->declare_parameter<std::string>("cmd_vel_topic", "cmd_vel");
-    this->declare_parameter<double>("linear_scale", -1);
-    this->declare_parameter<double>("angular_scale", -1);
-    this->declare_parameter<double>("deadzone", -1);
-    this->declare_parameter<double>("turbo_multiplier", -1);
-    this->declare_parameter<int>("axis_linear_x", -1);
-    this->declare_parameter<int>("axis_linear_y", -1);
-    this->declare_parameter<int>("axis_angular_z", -1);
-    this->declare_parameter<int>("button_turbo", -1);
+    this->declare_parameter<bool>("publish_stamped", false);
+    this->declare_parameter<std::string>("cmd_vel_frame_id", "base_link");
+    this->declare_parameter<double>("linear_scale", 0.7);
+    this->declare_parameter<double>("angular_scale", 1.0);
+    this->declare_parameter<double>("deadzone", 0.1);
+    this->declare_parameter<double>("turbo_multiplier", 1.5);
+    this->declare_parameter<int>("axis_linear_x", 1);
+    this->declare_parameter<int>("axis_linear_y", 0);
+    this->declare_parameter<int>("axis_angular_z", 3);
+    this->declare_parameter<int>("button_turbo", 5);
     
     // Get parameters
+    publish_stamped_ = this->get_parameter("publish_stamped").as_bool();
+    cmd_vel_frame_id_ = this->get_parameter("cmd_vel_frame_id").as_string();
     linear_scale_ = this->get_parameter("linear_scale").as_double();
     angular_scale_ = this->get_parameter("angular_scale").as_double();
     deadzone_ = this->get_parameter("deadzone").as_double();
@@ -31,6 +37,9 @@ GamepadController::GamepadController(const rclcpp::NodeOptions &options)
     axis_linear_y_ = this->get_parameter("axis_linear_y").as_int();
     axis_angular_z_ = this->get_parameter("axis_angular_z").as_int();
     button_turbo_ = this->get_parameter("button_turbo").as_int();
+    if (deadzone_ < 0.0) {
+        deadzone_ = 0.0;
+    }
     
     // Create subscription to joy topic
     joy_subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(
@@ -47,21 +56,30 @@ GamepadController::GamepadController(const rclcpp::NodeOptions &options)
     std::string cmd_vel_topic = this->get_parameter("cmd_vel_topic").as_string();
 
     // Create publisher for cmd_vel
-    cmd_vel_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>(cmd_vel_topic, 10);
+    if (publish_stamped_) {
+        cmd_vel_stamped_publisher_ =
+            this->create_publisher<geometry_msgs::msg::TwistStamped>(cmd_vel_topic, 10);
+    } else {
+        cmd_vel_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>(cmd_vel_topic, 10);
+    }
     
     // Create timer for continuous publishing (10Hz)
     timer_ = this->create_wall_timer(
         std::chrono::milliseconds(100),
         std::bind(&GamepadController::publish_twist, this));
     
-    RCLCPP_INFO(this->get_logger(), "Gamepad controller initialized. Publishing to: %s", cmd_vel_topic.c_str());
-    RCLCPP_INFO(this->get_logger(), "PS4 Controls: axis[%d/%d] = movement, axis[%d] = rotation, button[%d] = turbo", 
-                axis_linear_x_, axis_linear_y_, axis_angular_z_, button_turbo_);
-    if (axis_linear_x_ < 0 || axis_linear_y_ < 0 || axis_angular_z_ < 0) {
-        RCLCPP_WARN(this->get_logger(),
-                    "Axis mappings are unset (=-1). Waiting for /gamepad_buttons to initialize [x,y,z].");
-    }
-    RCLCPP_INFO(this->get_logger(), "Listening for axis remap on /gamepad_buttons [Int32MultiArray: x,y,z]");
+    RCLCPP_INFO(
+        this->get_logger(),
+        "Gamepad controller initialized. Publishing %s to %s",
+        publish_stamped_ ? "TwistStamped" : "Twist",
+        cmd_vel_topic.c_str());
+    RCLCPP_INFO(
+        this->get_logger(),
+        "Controller mapping axis[x:%d y:%d yaw:%d] turbo button[%d]",
+        axis_linear_x_, axis_linear_y_, axis_angular_z_, button_turbo_);
+    RCLCPP_INFO(
+        this->get_logger(),
+        "Listening for optional axis remap on /gamepad_buttons [Int32MultiArray: x,y,z]");
 }
 
 GamepadController::~GamepadController() {}
@@ -102,21 +120,15 @@ void GamepadController::gamepad_button_callback(const std_msgs::msg::Int32MultiA
 }
 
 void GamepadController::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg) {
-    // Ensure axis mapping has been provided
-    if (axis_linear_x_ < 0 || axis_linear_y_ < 0 || axis_angular_z_ < 0) {
-        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
-                             "Axis mappings not set. Awaiting /gamepad_buttons [x,y,z].");
-        return;
-    }
-
     // Check if we have enough axes and buttons
     const size_t axes_sz = msg->axes.size();
+    const bool needs_turbo_button = button_turbo_ >= 0;
     if (static_cast<size_t>(axis_linear_x_) >= axes_sz ||
         static_cast<size_t>(axis_linear_y_) >= axes_sz ||
         static_cast<size_t>(axis_angular_z_) >= axes_sz ||
-        msg->buttons.size() <= static_cast<size_t>(button_turbo_)) {
+        (needs_turbo_button && msg->buttons.size() <= static_cast<size_t>(button_turbo_))) {
         RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-                             "PS4 controller doesn't have enough axes/buttons");
+                             "Controller doesn't have enough axes/buttons for configured mapping");
         return;
     }
     
@@ -134,8 +146,8 @@ void GamepadController::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
     linear_y_ = apply_deadzone(raw_linear_y);
     angular_z_ = apply_deadzone(raw_angular_z);
     
-    // Check turbo button
-    turbo_mode_ = (msg->buttons[button_turbo_] == 1);
+    // Check turbo button (optional)
+    turbo_mode_ = needs_turbo_button && (msg->buttons[button_turbo_] == 1);
     
     // Debug output (throttled)
     RCLCPP_DEBUG_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
@@ -165,7 +177,15 @@ void GamepadController::publish_twist() {
     twist_msg.angular.z = angular_z_ * current_angular_scale;
     
     // Publish the message
-    cmd_vel_publisher_->publish(twist_msg);
+    if (publish_stamped_) {
+        geometry_msgs::msg::TwistStamped twist_stamped_msg;
+        twist_stamped_msg.header.stamp = this->now();
+        twist_stamped_msg.header.frame_id = cmd_vel_frame_id_;
+        twist_stamped_msg.twist = twist_msg;
+        cmd_vel_stamped_publisher_->publish(twist_stamped_msg);
+    } else {
+        cmd_vel_publisher_->publish(twist_msg);
+    }
     
     // Debug output for non-zero commands
     if (std::abs(linear_x_) > 0.01 || std::abs(linear_y_) > 0.01 || std::abs(angular_z_) > 0.01) {

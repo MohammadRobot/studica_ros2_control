@@ -8,6 +8,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
 #include "std_msgs/msg/int32_multi_array.hpp"
 
 namespace studica_control {
@@ -15,7 +16,6 @@ namespace studica_control {
 class GamepadController : public rclcpp::Node {
 public:
     explicit GamepadController(const rclcpp::NodeOptions &options = rclcpp::NodeOptions());
-    GamepadController(const std::string &name, const std::string &cmd_vel_topic);
     ~GamepadController();
 
     static std::shared_ptr<rclcpp::Node> initialize(rclcpp::Node *control);
@@ -29,6 +29,7 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscription_;
     rclcpp::Subscription<std_msgs::msg::Int32MultiArray>::SharedPtr gamepad_button_subscription_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
+    rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr cmd_vel_stamped_publisher_;
     
     // Timer for continuous publishing
     rclcpp::TimerBase::SharedPtr timer_;
@@ -37,6 +38,8 @@ private:
     double linear_scale_;
     double angular_scale_;
     double deadzone_;
+    bool publish_stamped_;
+    std::string cmd_vel_frame_id_;
     
     // Current movement state
     double linear_x_;
