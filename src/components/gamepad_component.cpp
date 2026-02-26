@@ -1,8 +1,8 @@
-#include "studica_control/gamepad_component.h"
+#include "studica_ros2_control/gamepad_component.h"
 
 #include <cmath>
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::shared_ptr<rclcpp::Node> GamepadController::initialize(rclcpp::Node * /*control*/) {
     // The GamepadController is now a composable node and will be initialized by the component manager.
@@ -195,9 +195,9 @@ void GamepadController::publish_twist() {
     }
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::GamepadController)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::GamepadController)

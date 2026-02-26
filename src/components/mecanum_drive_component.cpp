@@ -1,6 +1,6 @@
-#include "studica_control/mecanum_drive_component.h"
+#include "studica_ros2_control/mecanum_drive_component.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::shared_ptr<rclcpp::Node> MecanumDrive::initialize(rclcpp::Node *control, std::shared_ptr<MecanumOdometry> odom, std::shared_ptr<VMXPi> vmx) {
     control->declare_parameter<int>("mecanum_drive_component.can_id", -1);
@@ -43,7 +43,7 @@ MecanumDrive::MecanumDrive(const rclcpp::NodeOptions & options) : Node("mecanum_
 
 MecanumDrive::MecanumDrive(
     std::shared_ptr<VMXPi> vmx,
-    std::shared_ptr<studica_control::MecanumOdometry> odom,
+    std::shared_ptr<studica_ros2_control::MecanumOdometry> odom,
     const std::string &name, 
     const uint8_t &can_id, 
     const uint16_t &motor_freq, 
@@ -80,7 +80,7 @@ MecanumDrive::MecanumDrive(
 
     dist_per_tick_ = 2 * M_PI * wheel_radius_ / ticks_per_rotation_;
     titan_ = std::make_shared<studica_driver::Titan>(can_id_, motor_freq_, dist_per_tick_, vmx_);
-    service_ = this->create_service<studica_control::srv::SetData>(
+    service_ = this->create_service<studica_ros2_control::srv::SetData>(
         "titan_cmd",
         std::bind(&MecanumDrive::cmd_callback, this, std::placeholders::_1, std::placeholders::_2));
     
@@ -112,29 +112,29 @@ MecanumDrive::MecanumDrive(
         10,
         std::bind(&MecanumDrive::cmd_vel_callback, this, std::placeholders::_1)
     );
-    fl_enc_sub_ = this->create_subscription<studica_control::msg::EncoderMsg>(
+    fl_enc_sub_ = this->create_subscription<studica_ros2_control::msg::EncoderMsg>(
         "fl_enc",
         10,
         std::bind(&MecanumDrive::fl_enc_callback, this, std::placeholders::_1)
     );
-    fr_enc_sub_ = this->create_subscription<studica_control::msg::EncoderMsg>(
+    fr_enc_sub_ = this->create_subscription<studica_ros2_control::msg::EncoderMsg>(
         "fr_enc",
         10,
         std::bind(&MecanumDrive::fr_enc_callback, this, std::placeholders::_1)
     );
-    rl_enc_sub_ = this->create_subscription<studica_control::msg::EncoderMsg>(
+    rl_enc_sub_ = this->create_subscription<studica_ros2_control::msg::EncoderMsg>(
         "rl_enc",
         10,
         std::bind(&MecanumDrive::rl_enc_callback, this, std::placeholders::_1)
     );
-    rr_enc_sub_ = this->create_subscription<studica_control::msg::EncoderMsg>(
+    rr_enc_sub_ = this->create_subscription<studica_ros2_control::msg::EncoderMsg>(
         "rr_enc",
         10,
         std::bind(&MecanumDrive::rr_enc_callback, this, std::placeholders::_1)
     );
 }
 
-double MecanumDrive::enc_distance(const studica_control::msg::EncoderMsg::SharedPtr msg, bool inverted) {
+double MecanumDrive::enc_distance(const studica_ros2_control::msg::EncoderMsg::SharedPtr msg, bool inverted) {
     double distance = msg->encoder_count * dist_per_tick_;
     if (inverted) {
         distance *= -1;
@@ -142,23 +142,23 @@ double MecanumDrive::enc_distance(const studica_control::msg::EncoderMsg::Shared
     return distance;
 }
 
-void MecanumDrive::fl_enc_callback(const studica_control::msg::EncoderMsg::SharedPtr msg) {
+void MecanumDrive::fl_enc_callback(const studica_ros2_control::msg::EncoderMsg::SharedPtr msg) {
 
     fl_enc_dist_ = enc_distance(msg, fl_inverted_);
 }
-void MecanumDrive::fr_enc_callback(const studica_control::msg::EncoderMsg::SharedPtr msg) {
+void MecanumDrive::fr_enc_callback(const studica_ros2_control::msg::EncoderMsg::SharedPtr msg) {
     fr_enc_dist_ = enc_distance(msg, fr_inverted_);
 }
-void MecanumDrive::rl_enc_callback(const studica_control::msg::EncoderMsg::SharedPtr msg) {
+void MecanumDrive::rl_enc_callback(const studica_ros2_control::msg::EncoderMsg::SharedPtr msg) {
     rl_enc_dist_ = enc_distance(msg, rl_inverted_);
 }
-void MecanumDrive::rr_enc_callback(const studica_control::msg::EncoderMsg::SharedPtr msg) {
+void MecanumDrive::rr_enc_callback(const studica_ros2_control::msg::EncoderMsg::SharedPtr msg) {
     rr_enc_dist_ = enc_distance(msg, rr_inverted_);
 }
 
 MecanumDrive::~MecanumDrive() {}
 
-void MecanumDrive::cmd_callback(std::shared_ptr<studica_control::srv::SetData::Request> request, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void MecanumDrive::cmd_callback(std::shared_ptr<studica_ros2_control::srv::SetData::Request> request, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     std::string params = request->params;
     cmd(params, request, response);
 }
@@ -179,7 +179,7 @@ void MecanumDrive::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr m
     titan_->SetSpeed(rr_, rear_right);
 }
 
-void MecanumDrive::cmd(std::string params, std::shared_ptr<studica_control::srv::SetData::Request> request, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void MecanumDrive::cmd(std::string params, std::shared_ptr<studica_ros2_control::srv::SetData::Request> request, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     if (params == "enable") {
         titan_->Enable(true);
         response->success = true;
@@ -240,11 +240,11 @@ void MecanumDrive::publish_odometry() {
     odom_->updateAndPublish(front_left, front_right, rear_left, rear_right, current_time);
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::MecanumDrive)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::MecanumDrive)

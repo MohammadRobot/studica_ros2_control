@@ -1,4 +1,4 @@
-# Sensor-only configuration for studica_control.
+# Sensor-only configuration for studica_ros2_control.
 # Drive controllers are disabled to avoid conflicts with ros2_control.
 
 control_server:

@@ -1,6 +1,6 @@
-#include "studica_control/dc_encoder_component.h"
+#include "studica_ros2_control/dc_encoder_component.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::vector<std::shared_ptr<rclcpp::Node>> DutyCycleEncoder::initialize(rclcpp::Node *control, std::shared_ptr<VMXPi> vmx) {
     std::vector<std::shared_ptr<rclcpp::Node>> dc_nodes;
@@ -30,10 +30,10 @@ DutyCycleEncoder::DutyCycleEncoder(const rclcpp::NodeOptions &options) : Node("d
 DutyCycleEncoder::DutyCycleEncoder(std::shared_ptr<VMXPi> vmx, const std::string &name, VMXChannelIndex port, const std::string &topic) 
     : rclcpp::Node(name), vmx_(vmx), port_(port) {
     duty_cycle_encoder_ = std::make_shared<studica_driver::DutyCycleEncoder>(port_, vmx_);
-    service_ = this->create_service<studica_control::srv::SetData>(
+    service_ = this->create_service<studica_ros2_control::srv::SetData>(
         "duty_cycle_encoder_cmd",
         std::bind(&DutyCycleEncoder::cmd_callback, this, std::placeholders::_1, std::placeholders::_2));
-    publisher_ = this->create_publisher<studica_control::msg::DutyCycleEncoderMsg>(topic, 10);
+    publisher_ = this->create_publisher<studica_ros2_control::msg::DutyCycleEncoderMsg>(topic, 10);
     timer_ = this->create_wall_timer(
         std::chrono::milliseconds(50),
         std::bind(&DutyCycleEncoder::publish_data, this));
@@ -41,13 +41,13 @@ DutyCycleEncoder::DutyCycleEncoder(std::shared_ptr<VMXPi> vmx, const std::string
 
 DutyCycleEncoder::~DutyCycleEncoder() {}
 
-void DutyCycleEncoder::cmd_callback(const std::shared_ptr<studica_control::srv::SetData::Request> request,
-    std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void DutyCycleEncoder::cmd_callback(const std::shared_ptr<studica_ros2_control::srv::SetData::Request> request,
+    std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
         std::string params = request->params;
         cmd(params, response);
     }
 
-void DutyCycleEncoder::cmd(std::string params, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void DutyCycleEncoder::cmd(std::string params, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     if (params == "get_absolute_position") {
         response->success = true;
         response->message = std::to_string(duty_cycle_encoder_->GetAbsolutePosition());
@@ -64,7 +64,7 @@ void DutyCycleEncoder::cmd(std::string params, std::shared_ptr<studica_control::
 }
 
 void DutyCycleEncoder::publish_data() {
-    auto msg = studica_control::msg::DutyCycleEncoderMsg();
+    auto msg = studica_ros2_control::msg::DutyCycleEncoderMsg();
     msg.absolute_angle = duty_cycle_encoder_->GetAbsolutePosition();
     msg.rollover_count = duty_cycle_encoder_->GetRolloverCount();
     msg.total_rotation = duty_cycle_encoder_->GetTotalRotation();
@@ -75,11 +75,11 @@ void DutyCycleEncoder::DisplayVMXError(VMXErrorCode vmxerr) {
     printf("VMX Error %d: %s\n", vmxerr, GetVMXErrorString(vmxerr));
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::DutyCycleEncoder)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::DutyCycleEncoder)

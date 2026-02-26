@@ -1,6 +1,6 @@
-#include "studica_control/titan_component.h"
+#include "studica_ros2_control/titan_component.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::vector<std::shared_ptr<rclcpp::Node>> Titan::initialize(rclcpp::Node *control, std::shared_ptr<VMXPi> vmx) {
     std::vector<std::shared_ptr<rclcpp::Node>> titan_nodes;
@@ -30,7 +30,7 @@ Titan::Titan(const rclcpp::NodeOptions & options) : Node("titan_", options) {}
 Titan::Titan(std::shared_ptr<VMXPi> vmx, const std::string &name, const uint8_t &canID, const uint16_t &motor_freq, const std::string &topic)
     : Node(name), vmx_(vmx), canID_(canID), motor_freq_(motor_freq) {
     titan_ = std::make_shared<studica_driver::Titan>(canID_, motor_freq_, 1, vmx_);
-    service_ = this->create_service<studica_control::srv::SetData>(
+    service_ = this->create_service<studica_ros2_control::srv::SetData>(
         "titan_cmd",
         std::bind(&Titan::cmd_callback, this, std::placeholders::_1, std::placeholders::_2));
     publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>(topic, 10);
@@ -47,12 +47,12 @@ Titan::Titan(std::shared_ptr<VMXPi> vmx, const std::string &name, const uint8_t 
 
 Titan::~Titan() {}
 
-void Titan::cmd_callback(std::shared_ptr<studica_control::srv::SetData::Request> request, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void Titan::cmd_callback(std::shared_ptr<studica_ros2_control::srv::SetData::Request> request, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     std::string params = request->params;
     cmd(params, request, response);
 }
 
-void Titan::cmd(std::string params, std::shared_ptr<studica_control::srv::SetData::Request> request, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void Titan::cmd(std::string params, std::shared_ptr<studica_ros2_control::srv::SetData::Request> request, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     if (params == "enable") {
         titan_->Enable(true);
         response->success = true;
@@ -117,11 +117,11 @@ void Titan::publish_encoders() {
     publisher_->publish(msg);
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::Titan)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::Titan)

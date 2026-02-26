@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(studica_control)
+project(studica_ros2_control)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -26,7 +26,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 get_target_property(STUDICA_DRIVERS_TARGET_TYPE studica_drivers::studica_drivers TYPE)
 set(STUDICA_CONTROL_WITH_HARDWARE TRUE)
 if(STUDICA_DRIVERS_TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
-  message(WARNING "studica_drivers built without VMXPi support. Building gamepad-only nodes in studica_control.")
+  message(WARNING "studica_drivers built without VMXPi support. Building gamepad-only nodes in studica_ros2_control.")
   set(STUDICA_CONTROL_WITH_HARDWARE FALSE)
 endif()
 
@@ -48,21 +48,21 @@ if(STUDICA_CONTROL_WITH_HARDWARE)
   )
 endif()
  
-set(studica_control_HDRS
-  include/studica_control/cobra_component.h
-  include/studica_control/device.h
-  include/studica_control/dc_encoder_component.h
-  include/studica_control/diff_drive_component.h
-  include/studica_control/diff_drive_odometry.h
-  include/studica_control/dio_component.h
-  include/studica_control/encoder_component.h
-  include/studica_control/gamepad_component.h
-  include/studica_control/imu_component.h
-  include/studica_control/mecanum_drive_component.h
-  include/studica_control/servo_component.h
-  include/studica_control/sharp_component.h
-  include/studica_control/titan_component.h
-  include/studica_control/ultrasonic_component.h
+set(studica_ros2_control_HDRS
+  include/studica_ros2_control/cobra_component.h
+  include/studica_ros2_control/device.h
+  include/studica_ros2_control/dc_encoder_component.h
+  include/studica_ros2_control/diff_drive_component.h
+  include/studica_ros2_control/diff_drive_odometry.h
+  include/studica_ros2_control/dio_component.h
+  include/studica_ros2_control/encoder_component.h
+  include/studica_ros2_control/gamepad_component.h
+  include/studica_ros2_control/imu_component.h
+  include/studica_ros2_control/mecanum_drive_component.h
+  include/studica_ros2_control/servo_component.h
+  include/studica_ros2_control/sharp_component.h
+  include/studica_ros2_control/titan_component.h
+  include/studica_ros2_control/ultrasonic_component.h
 )
 
 set(dependencies 
@@ -82,56 +82,56 @@ set(dependencies
 
 add_library(gamepad_component SHARED src/components/gamepad_component.cpp)
 ament_target_dependencies(gamepad_component ${dependencies})
-rclcpp_components_register_nodes(gamepad_component "studica_control::GamepadController")
+rclcpp_components_register_nodes(gamepad_component "studica_ros2_control::GamepadController")
 
-set(studica_control_component_targets gamepad_component)
-set(studica_control_export_libraries gamepad_component)
-set(studica_control_executables)
+set(studica_ros2_control_component_targets gamepad_component)
+set(studica_ros2_control_export_libraries gamepad_component)
+set(studica_ros2_control_executables)
 
 add_executable(gamepad_teleop src/gamepad_teleop_main.cpp)
 target_link_libraries(gamepad_teleop gamepad_component)
 ament_target_dependencies(gamepad_teleop ${dependencies})
-list(APPEND studica_control_executables gamepad_teleop)
+list(APPEND studica_ros2_control_executables gamepad_teleop)
 
 if(STUDICA_CONTROL_WITH_HARDWARE)
   add_library(cobra_component SHARED src/components/cobra_component.cpp)
   ament_target_dependencies(cobra_component ${dependencies})
   target_link_libraries(cobra_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(cobra_component "studica_control::cobra")
+  rclcpp_components_register_nodes(cobra_component "studica_ros2_control::cobra")
 
   add_library(dc_encoder_component SHARED src/components/dc_encoder_component.cpp)
   ament_target_dependencies(dc_encoder_component ${dependencies})
   target_link_libraries(dc_encoder_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(dc_encoder_component "studica_control::DutyCycleEncoder")
+  rclcpp_components_register_nodes(dc_encoder_component "studica_ros2_control::DutyCycleEncoder")
 
   add_library(diff_drive_component SHARED src/components/diff_drive_component.cpp)
   ament_target_dependencies(diff_drive_component ${dependencies})
   target_link_libraries(diff_drive_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(diff_drive_component "studica_control::DiffDrive")
+  rclcpp_components_register_nodes(diff_drive_component "studica_ros2_control::DiffDrive")
 
   add_library(diff_drive_odometry SHARED src/components/diff_drive_odometry.cpp)
   ament_target_dependencies(diff_drive_odometry ${dependencies})
-  rclcpp_components_register_nodes(diff_drive_odometry "studica_control::DiffOdometry")
+  rclcpp_components_register_nodes(diff_drive_odometry "studica_ros2_control::DiffOdometry")
 
   add_library(dio_component SHARED src/components/dio_component.cpp)
   ament_target_dependencies(dio_component ${dependencies})
   target_link_libraries(dio_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(dio_component "studica_control::DIO")
+  rclcpp_components_register_nodes(dio_component "studica_ros2_control::DIO")
 
   add_library(encoder_component SHARED src/components/encoder_component.cpp)
   ament_target_dependencies(encoder_component ${dependencies})
   target_link_libraries(encoder_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(encoder_component "studica_control::encoder")
+  rclcpp_components_register_nodes(encoder_component "studica_ros2_control::encoder")
 
   add_library(imu_component SHARED src/components/imu_component.cpp)
   ament_target_dependencies(imu_component ${dependencies})
   target_link_libraries(imu_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(imu_component "studica_control::imu")
+  rclcpp_components_register_nodes(imu_component "studica_ros2_control::imu")
 
   add_library(mecanum_drive_component SHARED src/components/mecanum_drive_component.cpp)
   ament_target_dependencies(mecanum_drive_component ${dependencies})
   target_link_libraries(mecanum_drive_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(mecanum_drive_component "studica_control::MecanumDrive")
+  rclcpp_components_register_nodes(mecanum_drive_component "studica_ros2_control::MecanumDrive")
 
   add_library(mecanum_drive_odometry SHARED src/components/mecanum_drive_odometry.cpp)
   ament_target_dependencies(mecanum_drive_odometry ${dependencies})
@@ -139,27 +139,27 @@ if(STUDICA_CONTROL_WITH_HARDWARE)
   add_library(servo_component SHARED src/components/servo_component.cpp)
   ament_target_dependencies(servo_component ${dependencies})
   target_link_libraries(servo_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(servo_component "studica_control::Servo")
+  rclcpp_components_register_nodes(servo_component "studica_ros2_control::Servo")
 
   add_library(sharp_component SHARED src/components/sharp_component.cpp)
   ament_target_dependencies(sharp_component ${dependencies})
   target_link_libraries(sharp_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(sharp_component "studica_control::sharp")
+  rclcpp_components_register_nodes(sharp_component "studica_ros2_control::sharp")
 
   add_library(titan_component SHARED src/components/titan_component.cpp)
   ament_target_dependencies(titan_component ${dependencies})
   target_link_libraries(titan_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(titan_component "studica_control::Titan")
+  rclcpp_components_register_nodes(titan_component "studica_ros2_control::Titan")
 
   add_library(ultrasonic_component SHARED src/components/ultrasonic_component.cpp)
   ament_target_dependencies(ultrasonic_component ${dependencies})
   target_link_libraries(ultrasonic_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(ultrasonic_component "studica_control::Ultrasonic")
+  rclcpp_components_register_nodes(ultrasonic_component "studica_ros2_control::Ultrasonic")
 
   target_link_libraries(diff_drive_component diff_drive_odometry)
   target_link_libraries(mecanum_drive_component mecanum_drive_odometry)
 
-  list(APPEND studica_control_component_targets
+  list(APPEND studica_ros2_control_component_targets
     cobra_component
     dc_encoder_component
     diff_drive_component
@@ -175,7 +175,7 @@ if(STUDICA_CONTROL_WITH_HARDWARE)
     ultrasonic_component
   )
 
-  list(APPEND studica_control_export_libraries
+  list(APPEND studica_ros2_control_export_libraries
     cobra_component
     dc_encoder_component
     diff_drive_component
@@ -212,18 +212,18 @@ if(STUDICA_CONTROL_WITH_HARDWARE)
   )
   ament_target_dependencies(manual_composition ${dependencies})
   target_link_libraries(manual_composition "${cpp_typesupport_target}")
-  list(APPEND studica_control_executables manual_composition)
+  list(APPEND studica_ros2_control_executables manual_composition)
 endif()
 
 install(TARGETS
-  ${studica_control_component_targets}
+  ${studica_ros2_control_component_targets}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
 install(TARGETS
-  ${studica_control_executables}
+  ${studica_ros2_control_executables}
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -247,7 +247,7 @@ install(DIRECTORY
 )
 
 ament_export_include_directories(include)
-ament_export_libraries(${studica_control_export_libraries})
+ament_export_libraries(${studica_ros2_control_export_libraries})
 ament_export_dependencies(${dependencies})
 
 ament_package()

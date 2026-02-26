@@ -1,6 +1,6 @@
-#include "studica_control/sharp_component.h"
+#include "studica_ros2_control/sharp_component.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::vector<std::shared_ptr<rclcpp::Node>> Sharp::initialize(rclcpp::Node *control, std::shared_ptr<VMXPi> vmx) {
     std::vector<std::shared_ptr<rclcpp::Node>> sharp_nodes;
@@ -29,7 +29,7 @@ Sharp::Sharp(const rclcpp::NodeOptions & options) : Node("sharp", options) {}
 Sharp::Sharp(std::shared_ptr<VMXPi> vmx, const std::string &name, VMXChannelIndex port, const std::string &topic)
     : rclcpp::Node(name), vmx_(vmx), port_(port) {
     sharp_ = std::make_shared<studica_driver::Sharp>(port_, vmx_);
-    service_ = this->create_service<studica_control::srv::SetData>(
+    service_ = this->create_service<studica_ros2_control::srv::SetData>(
         "sharp_cmd",
         std::bind(&Sharp::cmd_callback, this, std::placeholders::_1, std::placeholders::_2));
     publisher_ = this->create_publisher<sensor_msgs::msg::Range>(topic, 10);
@@ -40,12 +40,12 @@ Sharp::Sharp(std::shared_ptr<VMXPi> vmx, const std::string &name, VMXChannelInde
 
 Sharp::~Sharp() {}
 
-void Sharp::cmd_callback(std::shared_ptr<studica_control::srv::SetData::Request> request, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void Sharp::cmd_callback(std::shared_ptr<studica_ros2_control::srv::SetData::Request> request, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     std::string params = request->params;
     cmd(params, response);
 }
 
-void Sharp::cmd(std::string params, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void Sharp::cmd(std::string params, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     if (params == "get_distance") {
         response->success = true;
         response->message = std::to_string(sharp_->GetDistance());
@@ -73,11 +73,11 @@ void Sharp::publish_range() {
     publisher_->publish(msg);
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::Sharp)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::Sharp)

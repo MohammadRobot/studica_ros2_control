@@ -1,6 +1,6 @@
-#include "studica_control/servo_component.h"
+#include "studica_ros2_control/servo_component.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::vector<std::shared_ptr<rclcpp::Node>> Servo::initialize(rclcpp::Node *control, std::shared_ptr<VMXPi> vmx) {
     std::vector<std::shared_ptr<rclcpp::Node>> servo_nodes;
@@ -51,7 +51,7 @@ Servo::Servo(const rclcpp::NodeOptions &options) : Node("servo", options) {}
 Servo::Servo(std::shared_ptr<VMXPi> vmx, const std::string &name, VMXChannelIndex port, studica_driver::ServoType type, int min, int max, const std::string &topic)
     : rclcpp::Node(name), vmx_(vmx), port_(port), type_(type) {
     servo_ = std::make_shared<studica_driver::Servo>(port, type_, min, max, vmx_);
-    service_ = this->create_service<studica_control::srv::SetData>(
+    service_ = this->create_service<studica_ros2_control::srv::SetData>(
         name + "/set_servo_angle",
         std::bind(&Servo::cmd_callback, this, std::placeholders::_1, std::placeholders::_2));
     publisher_ = this->create_publisher<std_msgs::msg::Float32>(topic, 10);
@@ -62,8 +62,8 @@ Servo::Servo(std::shared_ptr<VMXPi> vmx, const std::string &name, VMXChannelInde
 
 Servo::~Servo() {}
 
-void Servo::cmd_callback(const std::shared_ptr<studica_control::srv::SetData::Request> request,
-                         std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void Servo::cmd_callback(const std::shared_ptr<studica_ros2_control::srv::SetData::Request> request,
+                         std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     try {
         int param_angle = std::stoi(request->params);
         servo_->SetAngle(param_angle);
@@ -88,11 +88,11 @@ void Servo::DisplayVMXError(VMXErrorCode vmxerr) {
     printf("VMX Error %d: %s\n", vmxerr, err_str);
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::Servo)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::Servo)

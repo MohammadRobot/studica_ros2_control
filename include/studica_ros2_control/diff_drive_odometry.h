@@ -13,7 +13,7 @@
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/transform_broadcaster.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 class RollingMeanAccumulator {
 public:
@@ -92,6 +92,6 @@ private:
     RollingMeanAccumulator angular_accumulator_;
 };
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #endif // DIFF_DRIVE_ODOMETRY_H

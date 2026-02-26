@@ -1,6 +1,6 @@
-#include "studica_control/diff_drive_odometry.h"
+#include "studica_ros2_control/diff_drive_odometry.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::shared_ptr<DiffOdometry> DiffOdometry::initialize(rclcpp::Node *control){
     control->declare_parameter<std::string>("diff_drive_odometry.name", "");
@@ -209,11 +209,11 @@ void DiffOdometry::resetAccumulators() {
     angular_accumulator_ = RollingMeanAccumulator(velocity_rolling_window_size_);
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::DiffOdometry)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::DiffOdometry)

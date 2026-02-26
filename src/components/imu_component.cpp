@@ -1,6 +1,6 @@
-#include "studica_control/imu_component.h"
+#include "studica_ros2_control/imu_component.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::shared_ptr<rclcpp::Node> Imu::initialize(rclcpp::Node *control, std::shared_ptr<VMXPi> vmx) {
     control->declare_parameter<std::string>("imu.name");
@@ -17,7 +17,7 @@ Imu::Imu(const rclcpp::NodeOptions &options) : Node("imu", options) {}
 Imu::Imu(std::shared_ptr<VMXPi> vmx, const std::string &name, const std::string &topic) : rclcpp::Node(name), vmx_(vmx) {
     imu_ = std::make_shared<studica_driver::Imu>(vmx_);
     imu_->ZeroYaw();
-    service_ = this->create_service<studica_control::srv::SetData>("get_imu_data",
+    service_ = this->create_service<studica_ros2_control::srv::SetData>("get_imu_data",
         std::bind(&Imu::cmd_callback, this, std::placeholders::_1, std::placeholders::_2));
     publisher_ = this->create_publisher<sensor_msgs::msg::Imu>(topic, 10);
     timer_ = this->create_wall_timer(
@@ -28,8 +28,8 @@ Imu::Imu(std::shared_ptr<VMXPi> vmx, const std::string &name, const std::string 
 
 Imu::~Imu() {}
 
-void Imu::cmd_callback(const std::shared_ptr<studica_control::srv::SetData::Request> /* request */,
-                       std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void Imu::cmd_callback(const std::shared_ptr<studica_ros2_control::srv::SetData::Request> /* request */,
+                       std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     if (imu_) RCLCPP_INFO(this->get_logger(), "IMU is available. Type: %s", typeid(*imu_).name());
     else RCLCPP_WARN(this->get_logger(), "IMU is not available.");
 
@@ -98,11 +98,11 @@ void Imu::DisplayVMXError(VMXErrorCode vmxerr) {
     printf("VMX Error %d: %s\n", vmxerr, err_str);
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::Imu)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::Imu)

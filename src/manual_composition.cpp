@@ -4,18 +4,18 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "studica_control/cobra_component.h"
-#include "studica_control/dc_encoder_component.h"
-#include "studica_control/diff_drive_component.h"
-#include "studica_control/dio_component.h"
-#include "studica_control/encoder_component.h"
-//#include "studica_control/gamepad_component.h"
-#include "studica_control/imu_component.h"
-#include "studica_control/mecanum_drive_component.h"
-#include "studica_control/servo_component.h"
-#include "studica_control/sharp_component.h"
-#include "studica_control/titan_component.h"
-#include "studica_control/ultrasonic_component.h"
+#include "studica_ros2_control/cobra_component.h"
+#include "studica_ros2_control/dc_encoder_component.h"
+#include "studica_ros2_control/diff_drive_component.h"
+#include "studica_ros2_control/dio_component.h"
+#include "studica_ros2_control/encoder_component.h"
+//#include "studica_ros2_control/gamepad_component.h"
+#include "studica_ros2_control/imu_component.h"
+#include "studica_ros2_control/mecanum_drive_component.h"
+#include "studica_ros2_control/servo_component.h"
+#include "studica_ros2_control/sharp_component.h"
+#include "studica_ros2_control/titan_component.h"
+#include "studica_ros2_control/ultrasonic_component.h"
 #include "VMXPi.h"
 
 class ControlServer : public rclcpp::Node {
@@ -69,66 +69,66 @@ public:
         }
 
         if (cobra_enabled) {
-            auto cobra_nodes = studica_control::Cobra::initialize(this, vmx_);
+            auto cobra_nodes = studica_ros2_control::Cobra::initialize(this, vmx_);
             component_nodes.insert(component_nodes.end(), cobra_nodes.begin(), cobra_nodes.end());
         }
 
         if (duty_cycle_enabled) {
-            auto duty_cycle_nodes = studica_control::DutyCycleEncoder::initialize(this, vmx_);
+            auto duty_cycle_nodes = studica_ros2_control::DutyCycleEncoder::initialize(this, vmx_);
             component_nodes.insert(component_nodes.end(), duty_cycle_nodes.begin(), duty_cycle_nodes.end());
         }
 
         if (diff_drive_enabled) {
-            auto odom = studica_control::DiffOdometry::initialize(this);
-            auto diff_drive_node = studica_control::DiffDrive::initialize(this, odom, vmx_);
+            auto odom = studica_ros2_control::DiffOdometry::initialize(this);
+            auto diff_drive_node = studica_ros2_control::DiffDrive::initialize(this, odom, vmx_);
             component_nodes.push_back(odom);
             component_nodes.push_back(diff_drive_node);
         }
 
         if (dio_enabled) {
-            auto dio_nodes = studica_control::DIO::initialize(this, vmx_);
+            auto dio_nodes = studica_ros2_control::DIO::initialize(this, vmx_);
             component_nodes.insert(component_nodes.end(), dio_nodes.begin(), dio_nodes.end());
         }
 
         if (encoder_enabled) {
-            auto encoder_nodes = studica_control::Encoder::initialize(this, vmx_);
+            auto encoder_nodes = studica_ros2_control::Encoder::initialize(this, vmx_);
             component_nodes.insert(component_nodes.end(), encoder_nodes.begin(), encoder_nodes.end());
         }
 
         //if (gamepad_enabled) {
-        //    auto gamepad_node = studica_control::GamepadController::initialize(this);
+        //    auto gamepad_node = studica_ros2_control::GamepadController::initialize(this);
         //    component_nodes.push_back(gamepad_node);
         //}
 
         if (imu_enabled) {
-            auto imu_node = studica_control::Imu::initialize(this, vmx_);
+            auto imu_node = studica_ros2_control::Imu::initialize(this, vmx_);
             component_nodes.push_back(imu_node);
         }
 
         if (mecanum_drive_enabled) {
-            auto odom = studica_control::MecanumOdometry::initialize(this);
-            auto mecanum_drive_node = studica_control::MecanumDrive::initialize(this, odom, vmx_);
+            auto odom = studica_ros2_control::MecanumOdometry::initialize(this);
+            auto mecanum_drive_node = studica_ros2_control::MecanumDrive::initialize(this, odom, vmx_);
             component_nodes.push_back(odom);
             component_nodes.push_back(mecanum_drive_node);
         }
 
         if (servo_enabled) {
-            auto servo_nodes = studica_control::Servo::initialize(this, vmx_);
+            auto servo_nodes = studica_ros2_control::Servo::initialize(this, vmx_);
             component_nodes.insert(component_nodes.end(), servo_nodes.begin(), servo_nodes.end());
         }
 
         if (sharp_enabled) {
-            auto sharp_nodes = studica_control::Sharp::initialize(this, vmx_);
+            auto sharp_nodes = studica_ros2_control::Sharp::initialize(this, vmx_);
             component_nodes.insert(component_nodes.end(), sharp_nodes.begin(), sharp_nodes.end());
         }
 
         if (titan_enabled) {
-            auto titan_nodes = studica_control::Titan::initialize(this, vmx_);
+            auto titan_nodes = studica_ros2_control::Titan::initialize(this, vmx_);
             component_nodes.insert(component_nodes.end(), titan_nodes.begin(), titan_nodes.end());
         }
 
         if (ultrasonic_enabled) {
-            auto ultrasonic_nodes = studica_control::Ultrasonic::initialize(this, vmx_);
+            auto ultrasonic_nodes = studica_ros2_control::Ultrasonic::initialize(this, vmx_);
             component_nodes.insert(component_nodes.end(), ultrasonic_nodes.begin(), ultrasonic_nodes.end());
         }
 

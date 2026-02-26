@@ -1,6 +1,6 @@
-#include "studica_control/diff_drive_component.h"
+#include "studica_ros2_control/diff_drive_component.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::shared_ptr<rclcpp::Node> DiffDrive::initialize(rclcpp::Node *control, std::shared_ptr<DiffOdometry> odom, std::shared_ptr<VMXPi> vmx) {
     control->declare_parameter<std::string>("diff_drive_component.name", "");
@@ -45,7 +45,7 @@ DiffDrive::DiffDrive(const rclcpp::NodeOptions & options) : Node("diff_drive", o
 
 DiffDrive::DiffDrive(
     std::shared_ptr<VMXPi> vmx,
-    std::shared_ptr<studica_control::DiffOdometry> odom,
+    std::shared_ptr<studica_ros2_control::DiffOdometry> odom,
     const std::string &name,
     const uint8_t &can_id,
     const uint16_t &motor_freq,
@@ -79,7 +79,7 @@ DiffDrive::DiffDrive(
 
     titan_ = std::make_shared<studica_driver::Titan>(can_id_, motor_freq_, dist_per_tick_, vmx_);
 
-    service_ = this->create_service<studica_control::srv::SetData>(
+    service_ = this->create_service<studica_ros2_control::srv::SetData>(
         "titan_cmd",
         std::bind(&DiffDrive::cmd_callback, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -116,7 +116,7 @@ DiffDrive::DiffDrive(
 
 DiffDrive::~DiffDrive() {}
 
-void DiffDrive::cmd_callback(std::shared_ptr<studica_control::srv::SetData::Request> request, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void DiffDrive::cmd_callback(std::shared_ptr<studica_ros2_control::srv::SetData::Request> request, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     std::string params = request->params;
     cmd(params, request, response);
 }
@@ -136,7 +136,7 @@ void DiffDrive::cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg)
     titan_->SetSpeed(rr_, right_command);
 }
 
-void DiffDrive::cmd(std::string params, std::shared_ptr<studica_control::srv::SetData::Request> request, std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void DiffDrive::cmd(std::string params, std::shared_ptr<studica_ros2_control::srv::SetData::Request> request, std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     if (params == "enable") {
         titan_->Enable(true);
         response->success = true;
@@ -202,11 +202,11 @@ void DiffDrive::publish_odometry() {
     odom_->updateAndPublish(left_encoder, right_encoder, current_time);
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::DiffDrive)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::DiffDrive)

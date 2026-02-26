@@ -15,7 +15,7 @@
 
 # define PLANAR_POINT_DIM 3
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 class MecanumOdometry : public rclcpp::Node {
     public:
@@ -64,6 +64,6 @@ class MecanumOdometry : public rclcpp::Node {
         double prev_rear_right_;
 };
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #endif // MECANUM_DRIVE_ODOMETRY_H

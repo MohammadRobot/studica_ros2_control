@@ -15,11 +15,11 @@ import yaml
 
 def generate_launch_description():
 
-    pkg_share = get_package_share_directory('studica_control')
+    pkg_share = get_package_share_directory('studica_ros2_control')
     params_file = os.path.join(pkg_share, 'config', 'params.yaml')
  
     manual_composition = Node(
-        package='studica_control',
+        package='studica_ros2_control',
         executable='manual_composition',
         name='control_server',
         output='screen',

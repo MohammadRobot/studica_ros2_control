@@ -24,7 +24,7 @@ def generate_launch_description():
     )
 
     gamepad_controller = Node(
-        package="studica_control",
+        package="studica_ros2_control",
         executable="gamepad_teleop",
         name="gamepad_controller",
         output="screen",

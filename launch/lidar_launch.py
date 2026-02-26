@@ -16,7 +16,7 @@ import time
 import yaml
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory('studica_control')
+    pkg_share = get_package_share_directory('studica_ros2_control')
     params_file = os.path.join(pkg_share, 'config', 'params.yaml')
     lidar_1_file = LaunchConfiguration('params_file1')
     lidar_2_file = LaunchConfiguration('params_file2')
@@ -46,7 +46,7 @@ def generate_launch_description():
     )
  
     manual_composition = Node(
-        package='studica_control',
+        package='studica_ros2_control',
         executable='manual_composition',
         name='control_server',
         output='screen',

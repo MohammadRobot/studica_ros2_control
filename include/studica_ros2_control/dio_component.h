@@ -8,10 +8,10 @@
 #include <std_msgs/msg/bool.hpp>
 
 #include "dio.h"
-#include "studica_control/srv/set_data.hpp"
+#include "studica_ros2_control/srv/set_data.hpp"
 #include "VMXPi.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 class DIO : public rclcpp::Node {
 public:
@@ -26,16 +26,16 @@ private:
     VMXChannelIndex pin_;
     studica_driver::PinMode pin_mode_;
     int btn_pin;                                    
-    rclcpp::Service<studica_control::srv::SetData>::SharedPtr service_;
+    rclcpp::Service<studica_ros2_control::srv::SetData>::SharedPtr service_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    void cmd_callback(const std::shared_ptr<studica_control::srv::SetData::Request> request,
-        std::shared_ptr<studica_control::srv::SetData::Response> response);
+    void cmd_callback(const std::shared_ptr<studica_ros2_control::srv::SetData::Request> request,
+        std::shared_ptr<studica_ros2_control::srv::SetData::Response> response);
     void publish_dio_state();
     void DisplayVMXError(VMXErrorCode vmxerr);
 };
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #endif // DIO_COMPONENT_H

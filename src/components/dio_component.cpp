@@ -1,6 +1,6 @@
-#include "studica_control/dio_component.h"
+#include "studica_ros2_control/dio_component.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::vector<std::shared_ptr<rclcpp::Node>> DIO::initialize(rclcpp::Node *control, std::shared_ptr<VMXPi> vmx) {
     std::vector<std::shared_ptr<rclcpp::Node>> dio_nodes;
@@ -43,7 +43,7 @@ DIO::DIO(std::shared_ptr<VMXPi> vmx, const std::string &name, VMXChannelIndex pi
     btn_pin = pin_;
     RCLCPP_INFO(this->get_logger(), "DIO button pin %d.", btn_pin);
     
-    service_ = this->create_service<studica_control::srv::SetData>(
+    service_ = this->create_service<studica_ros2_control::srv::SetData>(
         "dio_cmd",
         std::bind(&DIO::cmd_callback, this, std::placeholders::_1, std::placeholders::_2)
     );
@@ -57,8 +57,8 @@ DIO::DIO(std::shared_ptr<VMXPi> vmx, const std::string &name, VMXChannelIndex pi
 
 DIO::~DIO() {}
 
-void DIO::cmd_callback(const std::shared_ptr<studica_control::srv::SetData::Request> request,
-                       std::shared_ptr<studica_control::srv::SetData::Response> response) {
+void DIO::cmd_callback(const std::shared_ptr<studica_ros2_control::srv::SetData::Request> request,
+                       std::shared_ptr<studica_ros2_control::srv::SetData::Response> response) {
     try {
         if (request->params == "toggle") {
             dio_->Set(!dio_->Get());
@@ -90,11 +90,11 @@ void DIO::publish_dio_state() {
     }
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::DIO)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::DIO)

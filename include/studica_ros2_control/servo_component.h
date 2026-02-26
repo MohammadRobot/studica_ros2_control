@@ -8,10 +8,10 @@
 #include "std_msgs/msg/float32.hpp"
 
 #include "servo.h"
-#include "studica_control/srv/set_data.hpp"
+#include "studica_ros2_control/srv/set_data.hpp"
 #include "VMXPi.h"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 class Servo : public rclcpp::Node {
 public:
@@ -23,17 +23,17 @@ public:
 private:
     std::shared_ptr<studica_driver::Servo> servo_;
     std::shared_ptr<VMXPi> vmx_;
-    rclcpp::Service<studica_control::srv::SetData>::SharedPtr service_;
+    rclcpp::Service<studica_ros2_control::srv::SetData>::SharedPtr service_;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
     VMXChannelIndex port_;
     studica_driver::ServoType type_;
-    void cmd_callback(const std::shared_ptr<studica_control::srv::SetData::Request> request,
-        std::shared_ptr<studica_control::srv::SetData::Response> response);
+    void cmd_callback(const std::shared_ptr<studica_ros2_control::srv::SetData::Request> request,
+        std::shared_ptr<studica_ros2_control::srv::SetData::Response> response);
     void publish_angle();
     void DisplayVMXError(VMXErrorCode vmxerr);
 };
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #endif // SERVO_COMPONENT_H

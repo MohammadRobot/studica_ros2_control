@@ -1,8 +1,8 @@
-#include "studica_control/mecanum_drive_odometry.h"
+#include "studica_ros2_control/mecanum_drive_odometry.h"
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/utils.hpp>
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 std::shared_ptr<MecanumOdometry> MecanumOdometry::initialize(rclcpp::Node *control) {
     control->declare_parameter<std::string>("mecanum_drive_odometry.name", "");
@@ -155,11 +155,11 @@ void MecanumOdometry::setWheelParams(const double length_x, const double length_
     length_y_ = length_y;
 }
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #include "rclcpp_components/register_node_macro.hpp"
 
 // Register the component with class_loader.
 // This acts as a sort of entry point, allowing the component to be discoverable when its library
 // is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(studica_control::MecanumOdometry)
+RCLCPP_COMPONENTS_REGISTER_NODE(studica_ros2_control::MecanumOdometry)

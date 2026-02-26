@@ -11,7 +11,7 @@
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "std_msgs/msg/int32_multi_array.hpp"
 
-namespace studica_control {
+namespace studica_ros2_control {
 
 class GamepadController : public rclcpp::Node {
 public:
@@ -56,6 +56,6 @@ private:
     double turbo_multiplier_;
 };
 
-} // namespace studica_control
+} // namespace studica_ros2_control
 
 #endif // STUDICA_CONTROL__GAMEPAD_COMPONENT_H_
