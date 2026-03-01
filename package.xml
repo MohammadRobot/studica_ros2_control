@@ -35,6 +35,7 @@
   <depend>tf2_geometry_msgs</depend>
   <depend>tf2_ros</depend>
   <exec_depend>joy</exec_depend>
+  <exec_depend>ydlidar_ros2_driver</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
