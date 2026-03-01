@@ -48,6 +48,26 @@ Gamepad launch (works in simulation and hardware):
 ros2 launch studica_ros2_control gamepad_launch.py cmd_vel_topic:=/diffbot_base_controller/cmd_vel publish_stamped:=true
 ```
 
+Real-robot conservative speed example:
+
+```bash
+ros2 launch studica_ros2_control gamepad_launch.py \
+  cmd_vel_topic:=/diffbot_base_controller/cmd_vel \
+  publish_stamped:=true \
+  linear_scale:=0.20 \
+  angular_scale:=0.60 \
+  turbo_multiplier:=1.0 \
+  button_turbo:=-1
+```
+
+Available tuning arguments:
+
+- `linear_scale` (default `0.7`): linear speed at full stick in m/s.
+- `angular_scale` (default `1.0`): angular speed at full stick in rad/s.
+- `deadzone` (default `0.1`): joystick deadzone.
+- `turbo_multiplier` (default `1.5`): multiplier when turbo is pressed.
+- `button_turbo` (default `5`): turbo button index; set `-1` to disable turbo mode.
+
 ## Using With studica_vmxpi_ros2
 
 If you use `studica_vmxpi_ros2` for ros2_control drive, keep drive controllers disabled in this package to avoid conflicts.
