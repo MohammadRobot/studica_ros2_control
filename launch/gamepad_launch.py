@@ -71,7 +71,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "linear_scale",
-                default_value="0.7",
+                default_value="1.0",
                 description="Linear velocity scale in m/s at full stick.",
             ),
             DeclareLaunchArgument(
@@ -86,7 +86,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "turbo_multiplier",
-                default_value="1.5",
+                default_value="2.0",
                 description="Multiplier when turbo button is pressed.",
             ),
             DeclareLaunchArgument(
