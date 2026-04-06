@@ -13,10 +13,6 @@ licensed under Apache-2.0.
 
 - Mohammad Alshamsi (`alshamsi.mohammad@gmail.com`)
 
-## Contributors
-
-- Mohammad Alshamsi (`@MohammadRobot`) - ROS 2 integration and maintenance
-
 ## Requirements
 
 - VMXPi library installed on the target machine.
