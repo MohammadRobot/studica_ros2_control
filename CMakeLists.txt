@@ -97,7 +97,7 @@ if(STUDICA_CONTROL_WITH_HARDWARE)
   add_library(cobra_component SHARED src/components/cobra_component.cpp)
   ament_target_dependencies(cobra_component ${dependencies})
   target_link_libraries(cobra_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(cobra_component "studica_ros2_control::cobra")
+  rclcpp_components_register_nodes(cobra_component "studica_ros2_control::Cobra")
 
   add_library(dc_encoder_component SHARED src/components/dc_encoder_component.cpp)
   ament_target_dependencies(dc_encoder_component ${dependencies})
@@ -121,12 +121,12 @@ if(STUDICA_CONTROL_WITH_HARDWARE)
   add_library(encoder_component SHARED src/components/encoder_component.cpp)
   ament_target_dependencies(encoder_component ${dependencies})
   target_link_libraries(encoder_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(encoder_component "studica_ros2_control::encoder")
+  rclcpp_components_register_nodes(encoder_component "studica_ros2_control::Encoder")
 
   add_library(imu_component SHARED src/components/imu_component.cpp)
   ament_target_dependencies(imu_component ${dependencies})
   target_link_libraries(imu_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(imu_component "studica_ros2_control::imu")
+  rclcpp_components_register_nodes(imu_component "studica_ros2_control::Imu")
 
   add_library(mecanum_drive_component SHARED src/components/mecanum_drive_component.cpp)
   ament_target_dependencies(mecanum_drive_component ${dependencies})
@@ -144,7 +144,7 @@ if(STUDICA_CONTROL_WITH_HARDWARE)
   add_library(sharp_component SHARED src/components/sharp_component.cpp)
   ament_target_dependencies(sharp_component ${dependencies})
   target_link_libraries(sharp_component studica_drivers::studica_drivers)
-  rclcpp_components_register_nodes(sharp_component "studica_ros2_control::sharp")
+  rclcpp_components_register_nodes(sharp_component "studica_ros2_control::Sharp")
 
   add_library(titan_component SHARED src/components/titan_component.cpp)
   ament_target_dependencies(titan_component ${dependencies})
@@ -245,6 +245,21 @@ install(DIRECTORY
   config
   DESTINATION share/${PROJECT_NAME}
 )
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  find_package(ament_lint_common REQUIRED)
+  # Legacy codebase: enable lint infrastructure first, then tighten checks incrementally.
+  set(AMENT_LINT_AUTO_EXCLUDE
+    ament_cmake_copyright
+    ament_cmake_cpplint
+    ament_cmake_flake8
+    ament_cmake_lint_cmake
+    ament_cmake_pep257
+    ament_cmake_uncrustify
+  )
+  ament_lint_auto_find_test_dependencies()
+endif()
 
 ament_export_include_directories(include)
 ament_export_libraries(${studica_ros2_control_export_libraries})
