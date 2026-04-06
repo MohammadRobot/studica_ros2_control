@@ -6,13 +6,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(ament_index_cpp REQUIRED)
 find_package(studica_drivers REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
-find_package(rcutils REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(rosidl_typesupport_c REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -30,54 +27,32 @@ if(STUDICA_DRIVERS_TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
   set(STUDICA_CONTROL_WITH_HARDWARE FALSE)
 endif()
 
-include_directories( # <- #include <"">
-  include
-)
-
 if(STUDICA_CONTROL_WITH_HARDWARE)
-  rosidl_generate_interfaces(${PROJECT_NAME} # <- SRV files (srv, msg, action)
+  rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/DutyCycleEncoderMsg.msg"
     "msg/EncoderMsg.msg"
     "msg/InitializeParams.msg"
     "srv/ControlImu.srv"
     "srv/SetData.srv"
   )
-
-  include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp
-  )
 endif()
- 
-set(studica_ros2_control_HDRS
-  include/studica_ros2_control/cobra_component.h
-  include/studica_ros2_control/device.h
-  include/studica_ros2_control/dc_encoder_component.h
-  include/studica_ros2_control/diff_drive_component.h
-  include/studica_ros2_control/diff_drive_odometry.h
-  include/studica_ros2_control/dio_component.h
-  include/studica_ros2_control/encoder_component.h
-  include/studica_ros2_control/gamepad_component.h
-  include/studica_ros2_control/imu_component.h
-  include/studica_ros2_control/mecanum_drive_component.h
-  include/studica_ros2_control/servo_component.h
-  include/studica_ros2_control/sharp_component.h
-  include/studica_ros2_control/titan_component.h
-  include/studica_ros2_control/ultrasonic_component.h
-)
 
-set(dependencies 
-  "ament_index_cpp" 
+set(dependencies
   "geometry_msgs"
   "nav_msgs"
-  "rclcpp" 
-  "rclcpp_action"
-  "rclcpp_components" 
-  "sensor_msgs"  
-  "std_msgs" 
-  "std_srvs" 
+  "rclcpp"
+  "rclcpp_components"
+  "sensor_msgs"
+  "std_msgs"
+  "std_srvs"
   "tf2"
   "tf2_ros"
-  "tf2_geometry_msgs" 
+  "tf2_geometry_msgs"
+)
+
+set(studica_ros2_control_include_dirs
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 
 add_library(gamepad_component SHARED src/components/gamepad_component.cpp)
@@ -215,6 +190,17 @@ if(STUDICA_CONTROL_WITH_HARDWARE)
   list(APPEND studica_ros2_control_executables manual_composition)
 endif()
 
+foreach(target
+  ${studica_ros2_control_component_targets}
+  ${studica_ros2_control_executables}
+)
+  target_compile_features(${target} PUBLIC cxx_std_17)
+  target_include_directories(${target} PUBLIC ${studica_ros2_control_include_dirs})
+  if(STUDICA_CONTROL_WITH_HARDWARE)
+    target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp)
+  endif()
+endforeach()
+
 install(TARGETS
   ${studica_ros2_control_component_targets}
   ARCHIVE DESTINATION lib
@@ -247,17 +233,17 @@ install(DIRECTORY
 )
 
 if(BUILD_TESTING)
+  option(STUDICA_STRICT_LINT "Enable full strict lint checks" OFF)
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_lint_common REQUIRED)
-  # Legacy codebase: enable lint infrastructure first, then tighten checks incrementally.
-  set(AMENT_LINT_AUTO_EXCLUDE
-    ament_cmake_copyright
-    ament_cmake_cpplint
-    ament_cmake_flake8
-    ament_cmake_lint_cmake
-    ament_cmake_pep257
-    ament_cmake_uncrustify
-  )
+  if(NOT STUDICA_STRICT_LINT)
+    # Legacy codebase: enable lint infrastructure first, then tighten checks incrementally.
+    set(AMENT_LINT_AUTO_EXCLUDE
+      ament_cmake_copyright
+      ament_cmake_cpplint
+      ament_cmake_uncrustify
+    )
+  endif()
   ament_lint_auto_find_test_dependencies()
 endif()
 

@@ -1,76 +1,60 @@
-"""
-Autonomous mapping launch script using LiDAR and SLAM.
-The robot will generate a map as you drive it around. Use: ros2 run teleop_twist_keyboard teleop_twist_keyboard
-To save the map, open a new, privledged terminal and run: ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap
-"""
-
-from launch import LaunchDescription
-from launch_ros.actions import Node
-from ament_index_python.packages import get_package_share_directory
-from launch.actions import ExecuteProcess
+"""Autonomous mapping launch with LiDAR and slam_toolbox."""
 
 import os
-import time
-import yaml
+
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import ExecuteProcess
+from launch_ros.actions import Node
+
 
 def generate_launch_description():
+    pkg_share = get_package_share_directory("studica_ros2_control")
+    params_file = os.path.join(pkg_share, "config", "params.yaml")
 
-    pkg_share = get_package_share_directory('studica_ros2_control')
-    params_file = os.path.join(pkg_share, 'config', 'params.yaml')
- 
     manual_composition = Node(
-        package='studica_ros2_control',
-        executable='manual_composition',
-        name='control_server',
-        output='screen',
-        parameters=[params_file]
+        package="studica_ros2_control",
+        executable="manual_composition",
+        name="control_server",
+        output="screen",
+        parameters=[params_file],
     )
+
     foxglove = Node(
-        package='foxglove_bridge',
-        executable='foxglove_bridge',
-        name='foxglove_bridge',
-        output='screen'
-    )
-
-    laser_tf = ExecuteProcess(
-        cmd=[[
-            'ros2 run tf2_ros static_transform_publisher --x 0.144 --y 0 --z 0 --qx 0 --qy 0 --qz 0.7071 --qw -0.7071 --frame-id base_link --child-frame-id laser_frame'
-        ]],
-        shell=True
-
+        package="foxglove_bridge",
+        executable="foxglove_bridge",
+        name="foxglove_bridge",
+        output="screen",
     )
 
     base_tf = ExecuteProcess(
         cmd=[[
-            'ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 base_footprint base_link'
+            "ros2 run tf2_ros static_transform_publisher "
+            "0 0 0 0 0 0 base_footprint base_link"
         ]],
-        shell=True
+        shell=True,
     )
-    
 
     lidar = ExecuteProcess(
-        cmd=['ros2', 'launch', 'ydlidar_ros2_driver', 'ydlidar_launch.py'],
-        output='screen'
+        cmd=["ros2", "launch", "ydlidar_ros2_driver", "ydlidar_launch.py"],
+        output="screen",
     )
 
     slam = ExecuteProcess(
-        cmd=['ros2', 'launch', 'slam_toolbox', 'online_sync_launch.py'],
-        output='screen'
+        cmd=["ros2", "launch", "slam_toolbox", "online_sync_launch.py"],
+        output="screen",
     )
 
     joy_node = ExecuteProcess(
-        cmd=['ros2', 'run', 'joy', 'game_controller_node'],
-        output='screen'
+        cmd=["ros2", "run", "joy", "game_controller_node"],
+        output="screen",
     )
 
-    nodes = [
+    return LaunchDescription([
         foxglove,
         manual_composition,
         base_tf,
-        # laser_tf,
         lidar,
         slam,
         joy_node,
-    ]
-
-    return LaunchDescription(nodes)
+    ])

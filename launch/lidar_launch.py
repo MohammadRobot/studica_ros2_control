@@ -1,6 +1,4 @@
-"""
-LiDAR-only launch wrapper for ydlidar_ros2_driver.
-"""
+"""LiDAR-only launch wrapper for ydlidar_ros2_driver."""
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, LogInfo
