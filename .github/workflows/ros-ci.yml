@@ -11,14 +11,16 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-22.04
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: ros2_ws/src/studica_ros2_control
 
       - name: Checkout studica_drivers dependency
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: MohammadRobot/studica_drivers
           path: ros2_ws/src/studica_drivers
@@ -53,8 +55,11 @@ jobs:
         run: |
           source /opt/ros/humble/setup.bash
           cd ros2_ws
+          set +e
           colcon test \
             --event-handlers console_direct+ \
             --return-code-on-test-failure \
             --packages-select studica_drivers studica_ros2_control
-          colcon test-result --verbose
+          test_rc=$?
+          colcon test-result --verbose || true
+          exit $test_rc
