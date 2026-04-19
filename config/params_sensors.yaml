@@ -20,6 +20,7 @@ control_server:
     diff_drive_component:
       enabled: false
       name: "diff_drive_controller"
+      titan_control_mode: "velocity" # open_loop | velocity | position
       can_id: 42
       motor_freq: 15600
       ticks_per_rotation: 1464
@@ -88,6 +89,7 @@ control_server:
     mecanum_drive_component:
       enabled: false
       name: "mecanum_drive_controller"
+      titan_control_mode: "velocity" # open_loop | velocity | position
       can_id: 42
       motor_freq: 15600
       ticks_per_rotation: 1464
